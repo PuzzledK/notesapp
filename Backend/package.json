@@ -1,0 +1,14 @@
+{
+  "name": "notebook",
+  "version": "1.0.0",
+  "description": "Cloud Based Notes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
