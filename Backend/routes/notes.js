@@ -4,6 +4,7 @@ const router = express.Router();
 const fetchUser = require("../middlewares/Getuser");
 const Notes = require("../models/Note");
 const { body, validationResult } = require("express-validator");
+const cors = require('cors');
 
 //ROUTE 1 : Get All the notes from a Logged in user using GET. Login required
 router.get("/fetchallnotes", fetchUser, async (req, res) => {
@@ -18,7 +19,7 @@ router.get("/fetchallnotes", fetchUser, async (req, res) => {
 
 //ROUTE 2 : Add new note using POST, login required
 router.post(
-  "/addnote",
+  "/addnote",cors(),
   fetchUser,
   [
     body("title", "Enter a valid Title").isLength({ min: 3 }),

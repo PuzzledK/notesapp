@@ -5,63 +5,20 @@ import { useState } from "react";
 const NoteState = (props) => {
 
     // DUMMY NOTES TO SEND
-    const notesInitial = [
-        {
-          "_id": "658573cb6953fd0c18bdf5a1",
-          "user": "65846d840df197e0e39d2274",
-          "title": "My Little Ponys 2",
-          "description": "We got new pony",
-          "tag": "General",
-          "dateCreated": "2023-12-22T11:32:27.317Z",
-          "__v": 0
-        },
-        {
-          "_id": "658573d86953fd0c18bdf5a3",
-          "user": "65846d840df197e0e39d2274",
-          "title": "My Little Ponys 3",
-          "description": "It died too :(",
-          "tag": "General",
-          "dateCreated": "2023-12-22T11:32:40.731Z",
-          "__v": 0
-        },
-        {
-          "_id": "658577cc4ec0722bcc8f53ae",
-          "user": "65846d840df197e0e39d2274",
-          "title": "My Little Ponys 4",
-          "description": "New Pony Method :)",
-          "tag": "General",
-          "dateCreated": "2023-12-22T11:49:32.036Z",
-          "__v": 0
-        },
-        {
-          "_id": "6585781dd209ae2ca2316ebd",
-          "user": "65846d840df197e0e39d2274",
-          "title": "My Little Ponys 5",
-          "description": "New Pony Method 2:)",
-          "tag": "General",
-          "dateCreated": "2023-12-22T11:50:53.641Z",
-          "__v": 0
-        },
-        {
-          "_id": "65857833d209ae2ca2316ebf",
-          "user": "65846d840df197e0e39d2274",
-          "title": "My Little Ponys 6",
-          "description": "New Pony Method 2 test 2:)",
-          "tag": "General",
-          "dateCreated": "2023-12-22T11:51:15.530Z",
-          "__v": 0
-        },
-        {
-          "_id": "65857d23da849ec8197f86d1",
-          "user": "65846d840df197e0e39d2274",
-          "title": "My Little Ponys 6",
-          "description": "New Pony Method 2 test 2:)",
-          "tag": "General",
-          "dateCreated": "2023-12-22T12:12:19.777Z",
-          "__v": 0
-        }
-      ]
+    let notesInitial =[];
 
+    const getNotes = async () => {
+      const response = await fetch(`http://localhost:80/api/notes/fetchallnotes`,
+      {
+       method:"GET",
+       headers:{
+        'Content-Type':'application/json',
+        'auth-token':localStorage.getItem('token'),
+       },
+      });
+      notesInitial = await response.json();
+      setNotes(notesInitial);
+    }
     // DUMMY NOTES END
 
     // JUST DUMMY FUNCTION TO UNDERSTAND
@@ -80,26 +37,67 @@ const NoteState = (props) => {
     //     },1000);
     // }
     // DUMMY FUNCTION ENDS
-
-    const [notes,setNotes] = useState(notesInitial);
+    const [notes,setNotes] = useState([]);
 
     //Add a Note
-    const addNote = (title,description,tag) =>{
-       //TO DO API CALL
-        let note = null;
-       setNotes(notes.push(note));
+    const addNote = async (note) =>{
+       //API CALL
+       let response = await fetch("http://localhost:80/api/notes/addnote",
+      {
+       method:"POST",
+       headers:{
+        'Content-Type':'application/json',
+        'auth-token':localStorage.getItem('token'),
+       },
+       body:JSON.stringify(note)
+      });
+
+      let newNote = await response.json();
+
+      //Update Notes Logic
+      setNotes(notes.concat(newNote));
     }
-    //Delete Note
-    const deleteNote = (id) =>{
-     
+    //Delete Not
+    const deleteNote = async (id) =>{
+      const response = await fetch(`http://localhost:80/api/notes/deletenote/${id}`,
+      {
+       method:"DELETE",
+       headers:{
+        'Content-Type':'application/json',
+        'auth-token':localStorage.getItem('token'),
+       },
+      });
+      const newNotes = notes.filter((note)=>{return note._id!==id})
+      setNotes(newNotes);
     }
     //Edit Note
-    const editNote = (id) =>{
+    const editNote = async (id,title,description,tag) =>{
+      //API CALL
+      const response = await fetch(`http://localhost:80/api/notes/updatenote/${id}`,
+      {
+       method:"PUT",
+       headers:{
+        'Content-Type':'application/json',
+        'auth-token':localStorage.getItem('token'),
+       },
+       body: JSON.stringify({title:title,description:description,tag:tag})
+      });
 
+      //LOGIC TO CHANGE NOTE
+      for (let index = 0; index < notes.length; index++) {
+        const element = notes[index];
+        if(element._id ===id){
+          element.title = title;
+          element.description = description;
+          element.tag = tag;
+          break;
+        }
+      }
+      getNotes();
     }
 
     return(
-        <noteContext.Provider value={{notes,addNote,deleteNote,editNote}}>
+        <noteContext.Provider value={{notes,addNote,deleteNote,editNote,getNotes}}>
             {props.children}
         </noteContext.Provider>
     )

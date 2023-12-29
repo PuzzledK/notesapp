@@ -15,7 +15,9 @@ router.post('/createuser',[
     body('email','Enter Valid Email').isEmail(),
     body('password','Minimum password length is 5 words').isLength({min : 5})
 ],
+
 async (req,res)=>{
+    let sucess = false;
     const errors = validationResult(req);
     if(!errors.isEmpty()){
         return res.status(400).json({errors: errors.array()});
@@ -26,7 +28,8 @@ async (req,res)=>{
     let user = await User.findOne({email:req.body.username})
 
     if(user){
-        return res.status(400).json({error:"User Already exists"})
+        sucess = false;
+        return res.status(400).json({error:"User Already exists",sucess})
     }
     const salt = await bcrypt.genSalt(10);
     const securePass = await bcrypt.hash(req.body.password,salt);
@@ -44,11 +47,12 @@ async (req,res)=>{
     }
 
     const authToken = jwt.sign(data,sec_key);
-
-    res.json({authtoken:authToken});
+    sucess = true;
+    res.json({authtoken:authToken,sucess});
 }catch(err){
+    sucess = false;
     console.log(err.message);
-    res.status(500).send("Some error occured")
+    res.status(500).json({msg:"Some error occured",sucess})
 }
 })
 
@@ -60,6 +64,7 @@ router.post('/login',[
 async (req,res) => {
 
 //checking for errors and returning errors if exists
+let sucess = false;
 const errors = validationResult(req);
 if(!errors.isEmpty()){
     return res.status(400).json({error : errors.array()})
@@ -80,7 +85,8 @@ if(!user){
 const passwordCompare = await bcrypt.compareSync(password,user.password);
 
 if(!passwordCompare){
-return res.status(400).send("Incorrect credentials")
+   sucess = false;
+return res.status(400).json({msg:"Incorrect credentials",sucess})
 }
 //Sending data if password matched
 const payload = {
@@ -91,7 +97,8 @@ const payload = {
 
 //Creating token and sending to server
 const authToken = jwt.sign(payload,sec_key);
-res.json({authToken:authToken})
+sucess = true;
+res.json({authToken:authToken,sucess})
 
 }catch(err){
 console.error(err.message);

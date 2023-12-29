@@ -1,43 +1,66 @@
-import React from "react";
+import React, { useState } from "react";
+import noteContext from "../Context/notes/NoteContext";
+import { useContext } from "react";
 
 const AddNote = () =>{
+    const context = useContext(noteContext);
+    const {addNote} = context;
+
+    const [note,setNote] = useState({title:"",description:"",tag:""});
+
+    const handleClick = (e) => {
+         e.preventDefault();
+         addNote(note);
+         setNote({title:"",description:"",tag:""});
+    }
+
+    const handleChange = (e) => {
+       setNote({...note,[e.target.name]:e.target.value})
+    }
+
     return(<>
         <h1>ADD A NOTE</h1>
         <form>
           <div className="form-group">
-            <label htmlFor="exampleInputEmail1">Email address</label>
+            <label htmlFor="title">Title</label>
             <input
-              type="email"
+              type="text"
               className="form-control"
-              id="exampleInputEmail1"
+              id="title"
               aria-describedby="emailHelp"
-              placeholder="Enter email"
+              placeholder="Enter Title"
+              onChange={handleChange}
+              name="title"
+              value={note.title}
             />
-            <small id="emailHelp" className="form-text text-muted">
-              We'll never share your email with anyone else.
-            </small>
           </div>
           <div className="form-group">
-            <label htmlFor="exampleInputPassword1">Password</label>
+            <label htmlFor="description">Description</label>
             <input
-              type="password"
+              name="description"
+              type="text"
               className="form-control"
-              id="exampleInputPassword1"
-              placeholder="Password"
+              id="description"
+              placeholder="Enter Description"
+              onChange={handleChange}
+              value={note.description}
             />
           </div>
-          <div className="form-check">
+          <div className="form-group">
+            <label htmlFor="tag">Tag</label>
             <input
-              type="checkbox"
-              className="form-check-input"
-              id="exampleCheck1"
+              type="text"
+              className="form-control"
+              id="tag"
+              aria-describedby="emailHelp"
+              placeholder="Enter Tag"
+              onChange={handleChange}
+              name="tag"
+              value={note.tag}
             />
-            <label className="form-check-label" htmlFor="exampleCheck1">
-              Check me out
-            </label>
           </div>
-          <button type="submit" className="btn btn-primary">
-            Submit
+          <button type="submit" className="btn btn-primary" onClick={handleClick} disabled={note.title.length<3 || note.description.length<5}>
+            Add Note
           </button>
         </form>
         </>
